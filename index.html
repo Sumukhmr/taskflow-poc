@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f4f7;
+      --sidebar-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text: #1a1625;
+      --text-secondary: #6e6b7b;
+      --border: #eae8ee;
+      --primary: #6c3ce0;
+      --primary-light: #ede7fb;
+      --primary-dark: #5226c4;
+      --accent-green: #10b981;
+      --accent-green-light: #d1fae5;
+      --accent-red: #ef4444;
+      --accent-red-light: #fee2e2;
+      --accent-yellow: #f59e0b;
+      --accent-yellow-light: #fef3c7;
+      --accent-blue: #3b82f6;
+      --accent-blue-light: #dbeafe;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --radius: 12px;
+      --shadow-sm: 0 1px 3px rgba(26,22,37,0.06);
+      --shadow-md: 0 4px 16px rgba(26,22,37,0.08);
+      --shadow-lg: 0 8px 32px rgba(26,22,37,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+
+    /* ── TOP NAVBAR ──────────────────────────────────── */
+    .navbar {
+      grid-column: 1 / -1;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 200px;
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .nav-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-search {
+      flex: 1;
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .nav-search input {
+      width: 100%;
+      padding: 9px 14px 9px 38px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .nav-search input:focus { border-color: var(--primary); }
+
+    .nav-search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .nav-team-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text);
+      outline: none;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────── */
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .quick-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 20px;
+    }
+
+    .quick-add-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .sidebar-section { margin-bottom: 20px; }
+
+    .sidebar-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      padding: 0 10px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--font-body);
+      transition: background 0.15s;
+    }
+
+    .sidebar-item:hover { background: var(--bg); }
+
+    .sidebar-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .sidebar-item-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .team-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sidebar-item .task-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      gap: 12px;
+      padding: 14px 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-stat { text-align: center; }
+
+    .sidebar-stat-num { font-size: 22px; font-weight: 700; }
+
+    .sidebar-stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ── MAIN CONTENT ────────────────────────────────── */
+    .main {
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+
+    /* ── DASHBOARD VIEW ──────────────────────────────── */
+    .dashboard-header { margin-bottom: 24px; }
+
+    .dashboard-header h2 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .dashboard-header .date {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+    }
+
+    .stat-card-value {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .stat-card.highlight {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .stat-card.highlight .stat-card-label { color: rgba(255,255,255,0.8); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 22px;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .panel-title-icon { font-size: 18px; }
+
+    /* Urgent Tasks */
+    .urgent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .urgent-item:last-child { border-bottom: none; }
+
+    .urgent-item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .urgent-item-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .urgent-item-title { font-size: 14px; font-weight: 500; }
+
+    .urgent-empty {
+      padding: 30px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Priority badges */
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-critical { background: var(--accent-red-light); color: var(--accent-red); }
+    .badge-high { background: #fce7f3; color: #be185d; }
+    .badge-medium { background: var(--accent-yellow-light); color: #92400e; }
+    .badge-low { background: var(--accent-green-light); color: #065f46; }
+
+    /* By Function panel */
+    .function-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .function-item:last-child { border-bottom: none; }
+
+    .function-name { font-size: 14px; font-weight: 500; flex: 1; }
+
+    .function-ratio {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    .function-bar-bg {
+      flex: 1;
+      max-width: 200px;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .function-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── LIST VIEW ───────────────────────────────────── */
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .list-header h2 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .add-task-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .add-task-btn:hover { background: var(--primary-dark); }
+
+    .task-table {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .task-table-header {
+      display: grid;
+      grid-template-columns: 100px 1fr 140px 120px 100px 100px 120px;
+      padding: 12px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 140px 120px 100px 100px 120px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      font-size: 14px;
+      transition: background 0.1s;
+    }
+
+    .task-row:hover { background: #faf9fc; }
+    .task-row:last-child { border-bottom: none; }
+    .task-row.completed-row { opacity: 0.55; }
+    .task-row.completed-row .task-row-title { text-decoration: line-through; }
+
+    .task-row-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .task-row-title { font-weight: 600; }
+
+    .task-row-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .task-row-assignee { font-size: 13px; color: var(--text-secondary); }
+
+    .task-row-due { font-size: 13px; }
+    .task-row-due.overdue { color: var(--accent-red); font-weight: 700; }
+
+    .task-row-actions { display: flex; gap: 6px; }
+
+    .action-btn {
+      border: none;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text-secondary);
+      transition: 0.15s;
+      font-family: var(--font-body);
+    }
+
+    .action-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .action-btn.del:hover { background: var(--accent-red-light); color: var(--accent-red); }
+
+    .empty-list {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ── MODALS ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,22,37,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 24px 0;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover { background: var(--bg); }
+
+    .modal-body { padding: 20px 24px 24px; }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .form-row-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 24px 22px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: 0.2s;
+    }
+
+    .btn-ghost { background: var(--card-bg); color: var(--text); }
+    .btn-ghost:hover { background: var(--bg); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .quick-defaults-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .quick-textarea-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      margin-top: 18px;
+      font-weight: 500;
+    }
+
+    /* ── TOAST ────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 200;
+      box-shadow: var(--shadow-lg);
+      animation: slideInRight 0.3s ease;
+    }
+
+    .toast-success { background: #059669; }
+    .toast-error { background: var(--accent-red); }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ── TEAM COLORS ─────────────────────────────────── */
+    .dot-0 { background: #f472b6; }
+    .dot-1 { background: #a78bfa; }
+    .dot-2 { background: #fbbf24; }
+    .dot-3 { background: #60a5fa; }
+    .dot-4 { background: #34d399; }
+    .dot-5 { background: #f87171; }
+    .dot-6 { background: #fb923c; }
+    .dot-7 { background: #818cf8; }
+
+    .bar-0 { background: #f472b6; }
+    .bar-1 { background: #a78bfa; }
+    .bar-2 { background: #fbbf24; }
+    .bar-3 { background: #60a5fa; }
+    .bar-4 { background: #34d399; }
+    .bar-5 { background: #f87171; }
+    .bar-6 { background: #fb923c; }
+    .bar-7 { background: #818cf8; }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .task-table-header, .task-row {
+        grid-template-columns: 80px 1fr 120px 100px 80px 80px 100px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 18px; }
+      .stat-row { grid-template-columns: 1fr 1fr; }
+      .form-row-4 { grid-template-columns: 1fr 1fr; }
+      .task-table-header { display: none; }
+      .task-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    /* ── INLINE EDITING ──────────────────────────────── */
+    .inline-editable {
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: background 0.15s;
+      min-height: 28px;
+    }
+
+    .inline-editable:hover {
+      background: var(--primary-light);
+    }
+
+    .inline-edit-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .inline-edit-select {
+      width: 100%;
+      padding: 5px 6px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      background: white;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .inline-user-dropdown {
+      position: relative;
+    }
+
+    .inline-user-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 2px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: var(--shadow-md);
+    }
+
+    .inline-user-list.open { display: block; }
+
+    .inline-user-item {
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.1s;
+    }
+
+    .inline-user-item:hover { background: var(--primary-light); }
+
+    /* ── SEARCHABLE DROPDOWN ─────────────────────────── */
+    .search-dropdown {
+      position: relative;
+    }
+
+    .search-dropdown input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-dropdown input:focus { border-color: var(--primary); }
+
+    .search-dropdown-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-dropdown-list.open { display: block; }
+
+    .search-dropdown-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.1s;
+    }
+
+    .search-dropdown-item:hover { background: var(--primary-light); }
+
+    .search-dropdown-item .user-name { font-weight: 500; }
+
+    .search-dropdown-item .user-team {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .search-dropdown-empty {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">T</div>
+      <span class="nav-logo-text">TaskFlow</span>
+    </div>
+    <div class="nav-search">
+      <span class="nav-search-icon">&#128269;</span>
+      <input type="text" id="globalSearch" placeholder="Search tasks..." />
+    </div>
+    <select class="nav-team-select" id="navTeamFilter">
+      <option value="All">All Teams</option>
+    </select>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <button class="quick-add-btn" onclick="openQuickAdd()">+ Quick Add</button>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Views</div>
+      <button class="sidebar-item active" data-view="dashboard" onclick="switchView('dashboard', this)">
+        <span class="sidebar-item-icon">&#9638;</span> Dashboard
+      </button>
+      <button class="sidebar-item" data-view="list" onclick="switchView('list', this)">
+        <span class="sidebar-item-icon">&#9776;</span> List
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Functions</div>
+      <div id="sidebarTeams"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-stat">
+        <div class="sidebar-stat-num" id="footerTotal">0</div>
+        <div class="sidebar-stat-label">Total</div>
+      </div>
+      <div class="sidebar-stat">
+        <div class="sidebar-stat-num" id="footerDone" style="color: var(--accent-green);">0</div>
+        <div class="sidebar-stat-label">Done</div>
+      </div>
+      <div class="sidebar-stat">
+        <div class="sidebar-stat-num" id="footerPending" style="color: var(--accent-yellow);">0</div>
+        <div class="sidebar-stat-label">Pending</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainContent">
+
+    <!-- Dashboard View -->
+    <div id="dashboardView">
+      <div class="dashboard-header">
+        <h2>Team Dashboard</h2>
+        <div class="date" id="dashDate"></div>
+      </div>
+      <div class="stat-row" id="statRow"></div>
+      <div class="dashboard-grid">
+        <div class="panel">
+          <div class="panel-title">
+            <span class="panel-title-icon">&#9200;</span> Urgent Tasks
+          </div>
+          <div id="urgentList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">
+            <span class="panel-title-icon">&#9638;</span> By Function
+          </div>
+          <div id="functionList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div id="listView" class="hidden">
+      <div class="list-header">
+        <h2 id="listTitle">All Tasks</h2>
+        <button class="add-task-btn" onclick="openAddTask()">+ Add Task</button>
+      </div>
+      <div class="task-table">
+        <div class="task-table-header">
+          <div>ID</div>
+          <div>Task</div>
+          <div>Assignee</div>
+          <div>Team</div>
+          <div>Priority</div>
+          <div>Due</div>
+          <div>Actions</div>
+        </div>
+        <div id="taskRows"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- QUICK ADD MODAL -->
+<div class="modal-overlay" id="quickAddModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>+ Quick Add Tasks</h3>
+      <button class="modal-close" onclick="closeModal('quickAddModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="quick-defaults-label">Set defaults for all tasks:</div>
+      <div class="form-row-4">
+        <div>
+          <label class="form-label">Owner</label>
+          <div class="search-dropdown" id="qOwnerDropdown">
+            <input type="text" class="form-input" id="qOwner" placeholder="Search user..." autocomplete="off" />
+            <div class="search-dropdown-list" id="qOwnerList"></div>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="qPriority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Function</label>
+          <select class="form-select" id="qTeam">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-input" id="qDueDate" />
+        </div>
+      </div>
+      <div class="quick-textarea-label">Enter tasks (one per line):</div>
+      <textarea class="form-textarea" id="qTitles" rows="7" placeholder="Design homepage mockup&#10;Write API documentation&#10;Set up CI/CD pipeline&#10;Review pull requests"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quickAddModal')">Cancel</button>
+      <button class="btn btn-primary" id="qSubmitBtn" onclick="submitQuickAdd()">+ Add 0 Tasks</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT TASK MODAL -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="taskModalTitle">+ Add Task</h3>
+      <button class="modal-close" onclick="closeModal('taskModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId" value="" />
+      <div class="form-group">
+        <label class="form-label">Task Title *</label>
+        <input type="text" class="form-input" id="fTitle" placeholder="Enter task title" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="fDesc" placeholder="Enter task details"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <div class="search-dropdown" id="fAssigneeDropdown">
+            <input type="text" class="form-input" id="fAssignee" placeholder="Search user..." autocomplete="off" />
+            <div class="search-dropdown-list" id="fAssigneeList"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Function / Team</label>
+          <select class="form-select" id="fTeam"><option value="">None</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-input" id="fDueDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="fPriority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancel</button>
+      <button class="btn btn-primary" id="fSubmitBtn" onclick="submitTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "/api";
+
+  let teams = [];
+  let users = [];
+  let stats = {};
+  let tasks = [];
+  let currentView = "dashboard";
+  let selectedTeam = "All";
+  let searchQuery = "";
+
+  // ── INIT ──────────────────────────────────────────
+  async function init() {
+    setDate();
+    await loadTeams();
+    await refreshData();
+  }
+
+  function setDate() {
+    const d = new Date();
+    const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+    document.getElementById("dashDate").textContent = d.toLocaleDateString("en-US", opts);
+  }
+
+  // ── API ───────────────────────────────────────────
+  async function api(url, method = "GET", body = null) {
+    const opts = { method, headers: { "Content-Type": "application/json" } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${API}${url}`, opts);
+    return res.json();
+  }
+
+  // ── TEAMS ─────────────────────────────────────────
+  async function loadTeams() {
+    try {
+      const [teamsData, usersData] = await Promise.all([
+        api("/teams"),
+        api("/users")
+      ]);
+      teams = teamsData.teams || [];
+      users = usersData.users || [];
+      renderSidebarTeams();
+      populateTeamDropdowns();
+    } catch (e) {
+      showToast("Failed to load teams", "error");
+    }
+  }
+
+  function renderSidebarTeams() {
+    const c = document.getElementById("sidebarTeams");
+    let html = `<button class="sidebar-item ${selectedTeam === 'All' ? 'active' : ''}"
+      onclick="selectTeam('All')">
+      <span class="sidebar-item-icon">&#9679;</span> All Functions
+    </button>`;
+
+    teams.forEach((t, i) => {
+      html += `<button class="sidebar-item ${selectedTeam === t ? 'active' : ''}"
+        onclick="selectTeam('${t}')">
+        <span class="team-dot dot-${i % 8}"></span> ${t}
+        <span class="task-count" id="tc_${i}"></span>
+      </button>`;
+    });
+
+    html += `<button class="sidebar-item ${selectedTeam === 'Unassigned' ? 'active' : ''}"
+      onclick="selectTeam('Unassigned')">
+      <span class="team-dot" style="background:#9ca3af;"></span> Unassigned
+      <span class="task-count" id="tc_un"></span>
+    </button>`;
+
+    c.innerHTML = html;
+  }
+
+  function populateTeamDropdowns() {
+    const nav = document.getElementById("navTeamFilter");
+    nav.innerHTML = '<option value="All">All Teams</option>';
+    teams.forEach(t => {
+      nav.innerHTML += `<option value="${t}" ${selectedTeam === t ? 'selected' : ''}>${t}</option>`;
+    });
+    nav.innerHTML += `<option value="Unassigned" ${selectedTeam === 'Unassigned' ? 'selected' : ''}>Unassigned</option>`;
+
+    ["qTeam", "fTeam"].forEach(id => {
+      const el = document.getElementById(id);
+      el.innerHTML = '<option value="">None</option>';
+      teams.forEach(t => { el.innerHTML += `<option value="${t}">${t}</option>`; });
+    });
+  }
+
+  // ── SELECT TEAM ───────────────────────────────────
+  async function selectTeam(team) {
+    selectedTeam = team;
+    document.getElementById("navTeamFilter").value = team;
+    renderSidebarTeams();
+    await refreshData();
+  }
+
+  document.getElementById("navTeamFilter").addEventListener("change", async (e) => {
+    selectedTeam = e.target.value;
+    renderSidebarTeams();
+    await refreshData();
+  });
+
+  // ── REFRESH ───────────────────────────────────────
+  async function refreshData() {
+    try {
+      const teamParam = selectedTeam === "All" ? "" : selectedTeam;
+      const [s, t] = await Promise.all([
+        api(`/stats?team=${encodeURIComponent(teamParam)}`),
+        api(`/tasks?team=${encodeURIComponent(teamParam)}`)
+      ]);
+      stats = s;
+      tasks = t.tasks || [];
+      renderDashboard();
+      renderList();
+      updateFooter();
+      updateTeamCounts();
+    } catch (e) {
+      showToast("Failed to load data", "error");
+    }
+  }
+
+  // ── SEARCH ────────────────────────────────────────
+  document.getElementById("globalSearch").addEventListener("input", (e) => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    renderList();
+  });
+
+  // ── SWITCH VIEW ───────────────────────────────────
+  function switchView(view, btn) {
+    currentView = view;
+    document.getElementById("dashboardView").classList.toggle("hidden", view !== "dashboard");
+    document.getElementById("listView").classList.toggle("hidden", view !== "list");
+    document.querySelectorAll(".sidebar-item[data-view]").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+  }
+
+  // ── RENDER DASHBOARD ─────────────────────────────
+  function renderDashboard() {
+    document.getElementById("statRow").innerHTML = `
+      <div class="stat-card">
+        <div class="stat-card-label">Total</div>
+        <div class="stat-card-value">${stats.total || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Done</div>
+        <div class="stat-card-value" style="color:var(--accent-green)">${stats.completed || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Pending</div>
+        <div class="stat-card-value" style="color:var(--accent-yellow)">${stats.pending || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Overdue</div>
+        <div class="stat-card-value" style="color:var(--accent-red)">${stats.overdue || 0}</div>
+      </div>
+      <div class="stat-card highlight">
+        <div class="stat-card-label">Complete</div>
+        <div class="stat-card-value">${stats.complete_pct || 0}%</div>
+      </div>`;
+
+    // Urgent
+    const urgent = stats.urgent || [];
+    document.getElementById("urgentList").innerHTML = urgent.length === 0
+      ? '<div class="urgent-empty">No urgent tasks. Looking good!</div>'
+      : urgent.map(t => `
+        <div class="urgent-item">
+          <div class="urgent-item-left">
+            <div class="urgent-item-id">${esc(t.task_id)}</div>
+            <div class="urgent-item-title">${esc(t.title)}</div>
+          </div>
+          <span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span>
+        </div>`).join("");
+
+    // By Function
+    const fns = stats.by_function || [];
+    document.getElementById("functionList").innerHTML = fns.length === 0
+      ? '<div class="urgent-empty">No data yet.</div>'
+      : fns.map((f, i) => {
+          const pct = f.total > 0 ? Math.round(f.completed / f.total * 100) : 0;
+          return `
+            <div class="function-item">
+              <span class="team-dot dot-${i % 8}"></span>
+              <div class="function-name">${esc(f.team)}</div>
+              <div class="function-bar-bg">
+                <div class="function-bar-fill bar-${i % 8}" style="width:${pct}%"></div>
+              </div>
+              <div class="function-ratio">${f.completed}/${f.total}</div>
+            </div>`;
+        }).join("");
+  }
+
+  // ── RENDER LIST ───────────────────────────────────
+  function renderList() {
+    const label = selectedTeam === "All" ? "All Tasks" : `${selectedTeam} Tasks`;
+    document.getElementById("listTitle").textContent = label;
+
+    const filtered = tasks.filter(t => {
+      if (!searchQuery) return true;
+      return t.title.toLowerCase().includes(searchQuery) ||
+             t.assigned_to.toLowerCase().includes(searchQuery) ||
+             t.task_id.toLowerCase().includes(searchQuery);
+    });
+
+    const container = document.getElementById("taskRows");
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-list">No tasks to show. Click "+ Add Task" or use Quick Add.</div>';
+      return;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    container.innerHTML = filtered.map(t => {
+      const overdue = t.status === "Pending" && t.due_date && t.due_date < today;
+      return `
+        <div class="task-row ${t.status === 'Completed' ? 'completed-row' : ''}" data-id="${t.task_id}">
+          <div class="task-row-id">${esc(t.task_id)}</div>
+          <div>
+            <div class="task-row-title inline-editable" onclick="inlineEditText(this, '${t.task_id}', 'title')">${esc(t.title)}</div>
+            <div class="task-row-desc inline-editable" onclick="inlineEditText(this, '${t.task_id}', 'description')">${esc(t.description) || "Add description..."}</div>
+          </div>
+          <div class="inline-editable" onclick="inlineEditUser(this, '${t.task_id}', '${esc(t.team)}')">${esc(t.assigned_to) || "Unassigned"}</div>
+          <div class="inline-editable" onclick="inlineEditSelect(this, '${t.task_id}', 'team', '${esc(t.team)}')" style="font-size:13px;color:var(--text-secondary)">${esc(t.team) || "None"}</div>
+          <div class="inline-editable" onclick="inlineEditSelect(this, '${t.task_id}', 'priority', '${t.priority}')"><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></div>
+          <div class="task-row-due inline-editable ${overdue ? 'overdue' : ''}" onclick="inlineEditDate(this, '${t.task_id}', '${t.due_date || ''}')">${t.due_date || "No date"}</div>
+          <div class="task-row-actions">
+            <button class="action-btn" onclick="toggleTask('${t.task_id}')" title="${t.status === 'Completed' ? 'Mark Pending' : 'Complete'}">${t.status === 'Completed' ? '&#8634;' : '&#10003;'}</button>
+            <button class="action-btn del" onclick="deleteTask('${t.task_id}')" title="Delete">&#10005;</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  // ── INLINE EDITING ──────────────────────────────────
+  function inlineEditText(el, taskId, field) {
+    if (el.querySelector("input")) return; // already editing
+
+    const currentValue = el.textContent.trim();
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "inline-edit-input";
+    input.value = currentValue === "Add description..." ? "" : currentValue;
+
+    el.textContent = "";
+    el.appendChild(input);
+    input.focus();
+    input.select();
+
+    async function save() {
+      const newVal = input.value.trim();
+      if (field === "title" && !newVal) {
+        renderList(); // title can't be empty, revert
+        return;
+      }
+      if (newVal !== currentValue && !(currentValue === "Add description..." && !newVal)) {
+        await saveInlineEdit(taskId, { [field]: newVal });
+      } else {
+        renderList();
+      }
+    }
+
+    input.addEventListener("blur", save);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+      if (e.key === "Escape") { input.value = currentValue; input.blur(); }
+    });
+  }
+
+  function inlineEditUser(el, taskId, taskTeam) {
+    if (el.querySelector("input")) return;
+
+    const currentValue = el.textContent.trim();
+    const isUnassigned = currentValue === "Unassigned";
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "inline-user-dropdown";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "inline-edit-input";
+    input.value = isUnassigned ? "" : currentValue;
+    input.placeholder = "Search user...";
+
+    const list = document.createElement("div");
+    list.className = "inline-user-list open";
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(list);
+    el.textContent = "";
+    el.appendChild(wrapper);
+    input.focus();
+
+    function renderOptions(query) {
+      const q = (query || "").toLowerCase();
+      let filtered = users;
+      if (taskTeam) {
+        filtered = filtered.filter(u => u.team === taskTeam);
+      }
+      if (q) {
+        filtered = filtered.filter(u => u.name.toLowerCase().includes(q));
+      }
+      const seen = new Set();
+      const distinct = [];
+      for (const u of filtered) {
+        if (!seen.has(u.name)) { seen.add(u.name); distinct.push(u); }
+      }
+
+      if (distinct.length === 0) {
+        list.innerHTML = '<div class="inline-user-item" style="color:var(--text-secondary)">No users found</div>';
+        return;
+      }
+
+      list.innerHTML = distinct.map(u =>
+        `<div class="inline-user-item" onmousedown="finishInlineUser(this, '${taskId}', '${esc(u.name)}')">${esc(u.name)}</div>`
+      ).join("");
+    }
+
+    renderOptions(input.value);
+    input.addEventListener("input", () => renderOptions(input.value));
+
+    input.addEventListener("blur", () => {
+      setTimeout(() => {
+        const newVal = input.value.trim();
+        if (newVal !== currentValue && newVal !== "" && !(isUnassigned && newVal === "")) {
+          saveInlineEdit(taskId, { assigned_to: newVal });
+        } else {
+          renderList();
+        }
+      }, 150);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+      if (e.key === "Escape") { input.value = currentValue; renderList(); }
+    });
+  }
+
+  function finishInlineUser(el, taskId, name) {
+    saveInlineEdit(taskId, { assigned_to: name });
+  }
+
+  function inlineEditSelect(el, taskId, field, currentValue) {
+    if (el.querySelector("select")) return;
+
+    const select = document.createElement("select");
+    select.className = "inline-edit-select";
+
+    let options = [];
+    if (field === "priority") {
+      options = ["Low", "Medium", "High", "Critical"];
+    } else if (field === "team") {
+      options = [{ value: "", label: "None" }, ...teams.map(t => ({ value: t, label: t }))];
+    }
+
+    options.forEach(opt => {
+      const o = document.createElement("option");
+      if (typeof opt === "string") {
+        o.value = opt;
+        o.textContent = opt;
+        if (opt === currentValue) o.selected = true;
+      } else {
+        o.value = opt.value;
+        o.textContent = opt.label;
+        if (opt.value === currentValue) o.selected = true;
+      }
+      select.appendChild(o);
+    });
+
+    el.textContent = "";
+    el.appendChild(select);
+    select.focus();
+
+    async function save() {
+      const newVal = select.value;
+      if (newVal !== currentValue) {
+        await saveInlineEdit(taskId, { [field]: newVal });
+      } else {
+        renderList();
+      }
+    }
+
+    select.addEventListener("blur", save);
+    select.addEventListener("change", () => select.blur());
+    select.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") renderList();
+    });
+  }
+
+  async function saveInlineEdit(taskId, data) {
+    try {
+      const result = await api(`/tasks/${taskId}`, "PUT", data);
+      if (result.error) {
+        showToast(result.error, "error");
+      } else {
+        showToast("Updated!");
+      }
+      await refreshData();
+    } catch (e) {
+      showToast("Failed to save", "error");
+      renderList();
+    }
+  }
+
+  function inlineEditDate(el, taskId, currentValue) {
+    if (el.querySelector("input")) return;
+
+    const input = document.createElement("input");
+    input.type = "date";
+    input.className = "inline-edit-input";
+    input.value = currentValue || "";
+
+    el.textContent = "";
+    el.appendChild(input);
+    input.focus();
+    input.showPicker?.();
+
+    async function save() {
+      const newVal = input.value;
+      if (newVal !== currentValue) {
+        await saveInlineEdit(taskId, { due_date: newVal });
+      } else {
+        renderList();
+      }
+    }
+
+    input.addEventListener("blur", save);
+    input.addEventListener("change", () => input.blur());
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") renderList();
+    });
+  }
+
+  // ── FOOTER / COUNTS ───────────────────────────────
+  function updateFooter() {
+    document.getElementById("footerTotal").textContent = stats.total || 0;
+    document.getElementById("footerDone").textContent = stats.completed || 0;
+    document.getElementById("footerPending").textContent = stats.pending || 0;
+  }
+
+  function updateTeamCounts() {
+    const fns = stats.by_function || [];
+    fns.forEach((f, i) => {
+      const el = document.getElementById(f.team === "Unassigned" ? "tc_un" : `tc_${i}`);
+      if (el) el.textContent = f.total;
+    });
+  }
+
+  // ── MODALS ────────────────────────────────────────
+  function openModal(id) { document.getElementById(id).classList.add("open"); }
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+  // Quick Add
+  function openQuickAdd() {
+    document.getElementById("qOwner").value = "";
+    document.getElementById("qPriority").value = "Medium";
+    document.getElementById("qTeam").value = selectedTeam !== "All" && selectedTeam !== "Unassigned" ? selectedTeam : "";
+    document.getElementById("qDueDate").value = "";
+    document.getElementById("qTitles").value = "";
+    updateQuickCount();
+    openModal("quickAddModal");
+  }
+
+  document.getElementById("qTitles").addEventListener("input", updateQuickCount);
+
+  function updateQuickCount() {
+    const n = document.getElementById("qTitles").value.split("\n").filter(l => l.trim()).length;
+    document.getElementById("qSubmitBtn").textContent = `+ Add ${n} Task${n !== 1 ? 's' : ''}`;
+  }
+
+  async function submitQuickAdd() {
+    const titles = document.getElementById("qTitles").value.split("\n").filter(l => l.trim());
+    if (titles.length === 0) { showToast("Enter at least one task", "error"); return; }
+
+    const btn = document.getElementById("qSubmitBtn");
+    btn.disabled = true;
+    try {
+      const result = await api("/tasks/bulk", "POST", {
+        titles,
+        assigned_to: document.getElementById("qOwner").value.trim(),
+        priority: document.getElementById("qPriority").value,
+        team: document.getElementById("qTeam").value,
+        due_date: document.getElementById("qDueDate").value
+      });
+      if (result.error) { showToast(result.error, "error"); }
+      else { showToast(`${result.count} tasks added!`); closeModal("quickAddModal"); await refreshData(); }
+    } catch (e) { showToast("Failed to add tasks", "error"); }
+    finally { btn.disabled = false; }
+  }
+
+  // Add / Edit
+  function openAddTask() {
+    document.getElementById("editId").value = "";
+    document.getElementById("fTitle").value = "";
+    document.getElementById("fDesc").value = "";
+    document.getElementById("fAssignee").value = "";
+    document.getElementById("fTeam").value = selectedTeam !== "All" && selectedTeam !== "Unassigned" ? selectedTeam : "";
+    document.getElementById("fDueDate").value = "";
+    document.getElementById("fPriority").value = "Medium";
+    document.getElementById("taskModalTitle").textContent = "+ Add Task";
+    document.getElementById("fSubmitBtn").textContent = "Add Task";
+    openModal("taskModal");
+  }
+
+  function openEditTask(taskId) {
+    const t = tasks.find(x => x.task_id === taskId);
+    if (!t) return;
+    document.getElementById("editId").value = taskId;
+    document.getElementById("fTitle").value = t.title;
+    document.getElementById("fDesc").value = t.description;
+    document.getElementById("fAssignee").value = t.assigned_to;
+    document.getElementById("fTeam").value = t.team;
+    document.getElementById("fDueDate").value = t.due_date;
+    document.getElementById("fPriority").value = t.priority;
+    document.getElementById("taskModalTitle").textContent = "Edit Task";
+    document.getElementById("fSubmitBtn").textContent = "Update Task";
+    openModal("taskModal");
+  }
+
+  async function submitTask() {
+    const title = document.getElementById("fTitle").value.trim();
+    if (!title) { showToast("Task title is required", "error"); return; }
+
+    const btn = document.getElementById("fSubmitBtn");
+    btn.disabled = true;
+
+    const data = {
+      title,
+      description: document.getElementById("fDesc").value.trim(),
+      assigned_to: document.getElementById("fAssignee").value.trim(),
+      team: document.getElementById("fTeam").value,
+      due_date: document.getElementById("fDueDate").value,
+      priority: document.getElementById("fPriority").value
+    };
+
+    const editId = document.getElementById("editId").value;
+    try {
+      const result = editId
+        ? await api(`/tasks/${editId}`, "PUT", data)
+        : await api("/tasks", "POST", data);
+      if (result.error) { showToast(result.error, "error"); }
+      else { showToast(editId ? "Task updated!" : "Task added!"); closeModal("taskModal"); await refreshData(); }
+    } catch (e) { showToast("Something went wrong", "error"); }
+    finally { btn.disabled = false; }
+  }
+
+  // ── TOGGLE / DELETE ───────────────────────────────
+  async function toggleTask(taskId) {
+    try {
+      const r = await api(`/tasks/${taskId}/toggle`, "PATCH");
+      if (r.error) showToast(r.error, "error");
+      else { showToast(`Task marked as ${r.status}`); await refreshData(); }
+    } catch (e) { showToast("Failed to update", "error"); }
+  }
+
+  async function deleteTask(taskId) {
+    if (!confirm("Delete this task?")) return;
+    try {
+      const r = await api(`/tasks/${taskId}`, "DELETE");
+      if (r.error) showToast(r.error, "error");
+      else { showToast("Task deleted"); await refreshData(); }
+    } catch (e) { showToast("Failed to delete", "error"); }
+  }
+
+  // ── SEARCHABLE USER DROPDOWN ────────────────────
+  function setupUserDropdown(inputId, listId, teamSelectId) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+
+    input.addEventListener("focus", () => {
+      renderUserList(inputId, listId, teamSelectId, input.value);
+      list.classList.add("open");
+    });
+
+    input.addEventListener("input", () => {
+      renderUserList(inputId, listId, teamSelectId, input.value);
+      list.classList.add("open");
+    });
+
+    // Re-filter when team dropdown changes
+    if (teamSelectId) {
+      document.getElementById(teamSelectId).addEventListener("change", () => {
+        renderUserList(inputId, listId, teamSelectId, input.value);
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(`#${inputId}`) && !e.target.closest(`#${listId}`)) {
+        list.classList.remove("open");
+      }
+    });
+  }
+
+  function renderUserList(inputId, listId, teamSelectId, query) {
+    const list = document.getElementById(listId);
+    const q = (query || "").toLowerCase().trim();
+
+    // Get selected team to filter users
+    const selectedTeamVal = teamSelectId ? document.getElementById(teamSelectId).value : "";
+
+    let filtered = users;
+
+    // If a team is selected, show only that team's users
+    if (selectedTeamVal) {
+      filtered = filtered.filter(u => u.team === selectedTeamVal);
+    }
+
+    // Search by name
+    if (q) {
+      filtered = filtered.filter(u => u.name.toLowerCase().includes(q));
+    }
+
+    // Deduplicate names
+    const seen = new Set();
+    const distinct = [];
+    for (const u of filtered) {
+      if (!seen.has(u.name)) {
+        seen.add(u.name);
+        distinct.push(u);
+      }
+    }
+
+    if (distinct.length === 0) {
+      list.innerHTML = q
+        ? `<div class="search-dropdown-empty">No users found</div>`
+        : `<div class="search-dropdown-empty">No users added yet</div>`;
+      return;
+    }
+
+    list.innerHTML = distinct.map(u => `
+      <div class="search-dropdown-item" onmousedown="selectUser('${inputId}', '${listId}', '${esc(u.name)}')">
+        <span class="user-name">${esc(u.name)}</span>
+      </div>
+    `).join("");
+  }
+
+  function selectUser(inputId, listId, name) {
+    document.getElementById(inputId).value = name;
+    document.getElementById(listId).classList.remove("open");
+  }
+
+  // Initialize dropdowns: (input, list, linked team dropdown)
+  setupUserDropdown("fAssignee", "fAssigneeList", "fTeam");
+  setupUserDropdown("qOwner", "qOwnerList", "qTeam");
+
+  // ── UTILS ─────────────────────────────────────────
+  function esc(text) {
+    if (!text) return "";
+    const d = document.createElement("div");
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  function showToast(msg, type = "success") {
+    const old = document.querySelector(".toast");
+    if (old) old.remove();
+    const el = document.createElement("div");
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  document.querySelectorAll(".modal-overlay").forEach(o => {
+    o.addEventListener("click", (e) => { if (e.target === o) o.classList.remove("open"); });
+  });
+
+  init();
+</script>
+</body>
+</html>
