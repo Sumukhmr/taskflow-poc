@@ -831,7 +831,7 @@ def download_xlsx_template():
     try:
         try:
             from openpyxl import Workbook
-            from openpyxl.styles import Font, PatternFill, Alignment
+            from openpyxl.styles import Font, PatternFill, Alignment, NamedStyle
             from openpyxl.worksheet.datavalidation import DataValidation
             from openpyxl.utils import get_column_letter
         except ImportError:
@@ -841,15 +841,22 @@ def download_xlsx_template():
         headers = [
             "title", "description", "team", "sub_category", "assigned_to",
             "priority", "status", "quadrant",
-            "due_date", "start_date", "type", "notes",
+            "due_date (YYYY-MM-DD)", "start_date (YYYY-MM-DD)",
+            "type", "notes",
         ]
-        DATE_COLS = {"due_date", "start_date"}
+        DATE_COL_KEYS = {"due_date", "start_date"}
         col_index = {h: i + 1 for i, h in enumerate(headers)}
 
         wb = Workbook()
         ws = wb.active
         ws.title = "Tasks"
         ws.append(headers)
+
+        # NamedStyle is the most deterministic way to force a custom date
+        # format: it writes the format code into xl/styles.xml so Excel
+        # respects it regardless of the user's locale.
+        iso_date_style = NamedStyle(name="iso_date", number_format="yyyy-mm-dd")
+        wb.add_named_style(iso_date_style)
 
         # Style the header row
         header_fill = PatternFill("solid", fgColor="5B21B6")
@@ -876,14 +883,24 @@ def download_xlsx_template():
             "Any notes here",
         ])
 
-        # Set column widths + apply date format down each date column
+        # Build a lookup: header-key -> column number, ignoring the
+        # parenthetical hint so DATE_COL_KEYS still match.
+        def _key(h):
+            return h.split("(", 1)[0].strip().lower().replace(" ", "_")
+        col_by_key = {_key(h): i + 1 for i, h in enumerate(headers)}
+
+        # Set column widths + apply the NamedStyle to every date cell.
         for h, col in col_index.items():
             letter = get_column_letter(col)
             ws.column_dimensions[letter].width = max(len(h) + 4, 18)
-            if h in DATE_COLS:
-                # Format up to row 1000 so users see the picker as they fill it in
-                for r in range(2, 1001):
-                    ws[f"{letter}{r}"].number_format = "yyyy-mm-dd"
+        for k in DATE_COL_KEYS:
+            col = col_by_key[k]
+            letter = get_column_letter(col)
+            # Apply NamedStyle to example row + all future blank rows so
+            # both the displayed example and anything the user types
+            # render as YYYY-MM-DD.
+            for r in range(2, 1001):
+                ws[f"{letter}{r}"].style = "iso_date"
 
         # Drop-down lists for the validated columns
         def add_dropdown(col_letter, options):
