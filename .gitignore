@@ -1,0 +1,61 @@
+# === CREDENTIALS & SECRETS (NEVER COMMIT) ===
+credentials.json
+*.json
+!package.json
+.env
+.env.local
+.env.*.local
+!.env.example
+*.pem
+*.key
+secrets/
+config/secrets.*
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+*.so
+
+# === VIRTUAL ENVIRONMENTS ===
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# === LOGS ===
+*.log
+server.log
+logs/
+
+# === UPLOADS & USER FILES ===
+static/uploads/
+
+# === OS FILES ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === EDITORS ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === MISC ===
+*.bak
+*.tmp
+.cache/
