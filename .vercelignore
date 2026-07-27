@@ -1,0 +1,6 @@
+.env
+credentials.json
+scripts/
+__pycache__/
+*.pyc
+.pythonanywhere*
