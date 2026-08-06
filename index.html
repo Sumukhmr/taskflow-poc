@@ -1576,8 +1576,19 @@
             position: relative;
             background: var(--white);
             -webkit-overflow-scrolling: touch;
+            /* Prevent wheel/trackpad scroll from escaping to the page when
+               tl-right reaches its own scroll boundary. */
+            overscroll-behavior: contain;
         }
         .tl-right-inner { position: relative; }
+        /* When the Timeline is embedded inside the initiative detail page,
+           use a shorter viewport-relative height so the page itself doesn't
+           grow taller than the viewport (which would make the page scroll
+           instead of the chart scrolling internally). */
+        .ini-timeline-mount .timeline-layout {
+            height: calc(100vh - 560px);
+            min-height: 380px;
+        }
 
         /* Vertical grid lines that span the whole bars area. */
         .tl-grid-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--border); opacity: .35; pointer-events: none; }
@@ -5967,6 +5978,9 @@
         </div>
     </div>
     <script>
+        // EGRESS OPTIMIZATION MODE - Aug 6 2026
+        // Realtime disabled, version check hourly, tab refresh disabled
+        // Re-enable all after Aug 15 2026 - see commented sections marked DISABLED Aug 6 2026
         function lIcon(name, size) { size = size || 16; return '<i data-lucide="' + name + '" style="width:' + size + 'px;height:' + size + 'px;display:inline-block;vertical-align:middle"></i>'; }
         function _lcIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
         const API = "/api";
@@ -6565,11 +6579,17 @@
 
         checkLogin();
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && loggedInUser) {
-                refreshData();
-            }
-        });
+        // DISABLED Aug 6 2026 - re-enable after Aug 15 2026
+        // let _lastVisibilityRefresh = 0;
+        // document.addEventListener('visibilitychange', () => {
+        //     if (document.visibilityState === 'visible' && loggedInUser) {
+        //         const now = Date.now();
+        //         if (now - _lastVisibilityRefresh > 60 * 60 * 1000) {
+        //             _lastVisibilityRefresh = now;
+        //             refreshData();
+        //         }
+        //     }
+        // });
 
         async function init() { if (window.innerWidth <= 860) { document.getElementById("sidebar").classList.add("closed"); } try { getSupaConfig(); const [fn, tm, us] = await Promise.all([api("/functions"), api("/teams"), api("/users")]); functions = fn.functions || {}; teams = tm.teams || []; users = us.users || []; expanded = new Set(); loadFilters(); await refreshData(); setTimeout(loadInsights, 2000); startVersionCheck(); } catch (e) { showToast("Failed to load: " + e.message, "err"); } }
         async function api(url, method = "GET", body = null) { const opts = { method, headers: { "Content-Type": "application/json" } }; if (body) { if (typeof body === "object" && loggedInUser) body.user = loggedInUser; opts.body = JSON.stringify(body); } if (method === "DELETE" && loggedInUser) { const sep = url.includes("?") ? "&" : "?"; url += sep + "user=" + encodeURIComponent(loggedInUser); } const r = await fetch(API + url, opts); return r.json(); }
@@ -6694,7 +6714,7 @@
             if (fDueDate === "pick") {
                 p += `<input type="date" class="f-chip on" style="padding:7px 10px;cursor:pointer" value="${fDueDatePick || ''}" onchange="fDueDatePick=this.value;render()" />`;
             }
-            const updatedOpts = [["all","All"],["today","Today"],["yesterday","Yesterday"],["week","This Week"],["last7","Last 7 Days"],["month","This Month"]];
+            const updatedOpts = [["all","All"],["today","Today"],["yesterday","Yesterday"],["week","This Week"],["last7","Last 7 Days"],["month","This Month"],["lastmonth","Last Month"]];
             p += `<select class="f-chip ${fUpdated !== 'all' ? 'on' : ''}" onchange="fUpdated=this.value;render()">${updatedOpts.map(([v,l]) => `<option value="${v}" ${fUpdated === v ? 'selected' : ''}>Updated: ${l}</option>`).join("")}</select>`;
             p += `<select class="f-chip ${fWorkType !== 'all' ? 'on' : ''}" onchange="fWorkType=this.value;render()"><option value="all">Type: All</option><option value="none" ${fWorkType === 'none' ? 'selected' : ''}>Type: None</option>${WORK_TYPES.map(w => `<option value="${w.id}" ${fWorkType === w.id ? 'selected' : ''}>Type: ${w.label}</option>`).join("")}</select>`;
             p += `<select class="f-chip ${fEnv !== 'all' ? 'on' : ''}" onchange="fEnv=this.value;render()"><option value="all">Env: All</option><option value="none" ${fEnv === 'none' ? 'selected' : ''}>Env: None</option>${ENVS.map(e => `<option value="${e.id}" ${fEnv === e.id ? 'selected' : ''}>Env: ${e.label}</option>`).join("")}</select>`;
@@ -6790,6 +6810,11 @@
             if (fUpdated === "month") {
                 const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                 return upd >= startOfMonth;
+            }
+            if (fUpdated === "lastmonth") {
+                const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                return upd >= startOfLastMonth && upd < startOfThisMonth;
             }
             return true;
         }
@@ -8364,7 +8389,7 @@
             try {
                 let r;
                 if (editId) {
-                    r = await api(`/initiatives/${editId}`, "PUT", { ...payload, user: currentUser });
+                    r = await api(`/initiatives/${editId}`, "PUT", { ...payload, user: loggedInUser });
                     if (r && r.error) { err.textContent = r.error; return; }
                     showToast("Initiative updated");
                     closeModal("newInitiativeModal");
@@ -9259,7 +9284,7 @@
                     clearInterval(_versionPollInterval);
                     showUpdateBanner();
                 }
-            }, 10000);
+            }, 3600000);
         }
 
         document.getElementById("globalSearch").addEventListener("input", e => { searchQuery = e.target.value.toLowerCase().trim(); render(); });
@@ -10069,6 +10094,15 @@
                         });
                     }
                 });
+
+                // Stop wheel events from bubbling past tl-right to the page.
+                // overscroll-behavior:contain (CSS) handles the same at the
+                // browser level; this JS guard covers browsers/modes where the
+                // CSS property alone isn't enough (e.g. embedded iframes, some
+                // mobile WebViews).
+                right.addEventListener('wheel', e => {
+                    e.stopPropagation();
+                }, { passive: true });
 
                 // ── Tooltip for truncated task names ───────────────────────────
                 {

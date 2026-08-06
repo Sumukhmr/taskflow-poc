@@ -1,4 +1,3 @@
-# EGRESS OPTIMIZATION - Aug 6 2026 - Re-enable all disabled features after Aug 15 2026 when billing cycle resets
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from supabase import create_client, Client
@@ -514,7 +513,7 @@ def sync_cache_from_supabase():
         try:
             from datetime import datetime as _dt
             elapsed = (_dt.now() - _dt.strptime(last, "%Y-%m-%d %H:%M:%S")).total_seconds()
-            if elapsed < 21600:
+            if elapsed < 600:
                 print(f"[sync] Skipped — last sync {int(elapsed)}s ago")
                 return
         except Exception:
@@ -635,7 +634,7 @@ def sync_functions(teams_hint=None):
 
 def background_sync():
     while True:
-        time.sleep(86400)
+        time.sleep(600)
         sync_cache_from_supabase()
 
 # ── SEED DEFAULT TEAMS ──────────────────────────────────────────
@@ -2413,7 +2412,6 @@ def refresh_cache():
     return jsonify({"message": "Cache refreshed.", "last_sync": cache["last_sync"]}), 200
 
 # ── STARTUP ──────────────────────────────────────────────────────
-# Data loaded once on startup - background sync disabled to save egress
 def startup():
     print("Seeding default teams...")
     seed_teams()
